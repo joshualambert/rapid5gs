@@ -55,7 +55,11 @@ dpkg -s open5gs-pcrf &> /dev/null || { log_error "open5gs-pcrf package not found
 log_info "Open5GS core packages (including PCRF) installed."
 
 log_step "Installing Required Utilities (iptables, persistence tools)"
-apt-get install -y iptables iptables-persistent yq || { log_error "Failed to install required utilities (iptables, iptables-persistent, yq)"; exit 1; }
+# Preseed iptables-persistent so it does not stop the install with an
+# interactive "save current rules?" debconf dialog.
+echo "iptables-persistent iptables-persistent/autosave_v4 boolean true" | debconf-set-selections
+echo "iptables-persistent iptables-persistent/autosave_v6 boolean true" | debconf-set-selections
+DEBIAN_FRONTEND=noninteractive apt-get install -y iptables iptables-persistent yq || { log_error "Failed to install required utilities (iptables, iptables-persistent, yq)"; exit 1; }
 if ! command -v iptables &> /dev/null; then log_error "iptables command not found after installation attempt."; exit 1; fi
 if ! command -v yq &> /dev/null; then log_error "yq command not found after installation attempt."; exit 1; fi
 log_info "Required base utilities are installed."
