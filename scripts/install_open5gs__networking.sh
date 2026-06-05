@@ -37,7 +37,14 @@ fi
 
 # --- Get LTE WAN Gateway ---
 LTE_WAN_SUBNET=$(ip route show dev "$LTE_WAN_INTERFACE" | grep "proto kernel" | awk '{print $1}' | head -1)
-LTE_WAN_GATEWAY="${LTE_WAN_SUBNET%.*}.1"
+
+# Prefer the gateway from an existing default route on this interface.
+# Only fall back to guessing .1 if no default route exists yet.
+LTE_WAN_GATEWAY=$(ip route show default | awk -v dev="$LTE_WAN_INTERFACE" '$0 ~ ("dev " dev) {for (i=1;i<NF;i++) if ($i=="via") {print $(i+1); exit}}')
+if [ -z "$LTE_WAN_GATEWAY" ]; then
+    LTE_WAN_GATEWAY="${LTE_WAN_SUBNET%.*}.1"
+    log_warn "No existing default route on $LTE_WAN_INTERFACE; assuming gateway is $LTE_WAN_GATEWAY"
+fi
 
 log_info "LTE WAN subnet: $LTE_WAN_SUBNET, Gateway: $LTE_WAN_GATEWAY"
 
