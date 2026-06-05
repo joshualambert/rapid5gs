@@ -66,6 +66,24 @@ check_ram() {
     fi
 }
 
+# Function to check CPU AVX support (required by MongoDB 5.0+)
+check_cpu_avx() {
+    echo -e "\n${YELLOW}Checking CPU instruction set...${NC}"
+    if grep -q -m1 -w avx /proc/cpuinfo; then
+        echo -e "${GREEN}\u2713 CPU supports AVX${NC}"
+        return 0
+    else
+        echo -e "${RED}\u2717 CPU does not support AVX.${NC}"
+        echo "MongoDB 5.0 and newer requires a CPU with AVX instructions."
+        echo "Without AVX, mongod crashes on startup (invalid opcode) and the"
+        echo "HSS, PCRF, and WebUI cannot run."
+        echo "Use AVX-capable hardware (Intel Sandy Bridge / AMD Bulldozer or"
+        echo "newer). On a VM, also make sure the hypervisor passes AVX through"
+        echo "to the guest (e.g. CPU type 'host' on Proxmox, not kvm64)."
+        return 1
+    fi
+}
+
 # Function to check Ubuntu version
 check_os_version() {
     echo -e "\n${YELLOW}Checking operating system...${NC}"
@@ -99,12 +117,14 @@ check_storage
 storage_check=$?
 check_ram
 ram_check=$?
+check_cpu_avx
+avx_check=$?
 check_os_version
 os_check=$?
 
 # Summary
 echo -e "\n${GREEN}=== System Requirements Summary ===${NC}"
-if [ "$network_check" -eq 0 ] && [ "$storage_check" -eq 0 ] && [ "$ram_check" -eq 0 ] && [ "$os_check" -eq 0 ]; then
+if [ "$network_check" -eq 0 ] && [ "$storage_check" -eq 0 ] && [ "$ram_check" -eq 0 ] && [ "$avx_check" -eq 0 ] && [ "$os_check" -eq 0 ]; then
     echo -e "${GREEN}✓ All system requirements met!${NC}"
     exit 0
 else
