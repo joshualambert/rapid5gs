@@ -45,7 +45,7 @@ server {
     server_name $MGMT_IP;
 
     location / {
-        proxy_pass http://[::1]:9999;  # WebUI runs on IPv6 localhost port 9999
+        proxy_pass http://127.0.0.1:9999;  # WebUI listens on IPv4 loopback port 9999
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
