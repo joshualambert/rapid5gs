@@ -11,13 +11,13 @@
 
 # Rapid5GS
 
-Deploy your mobile network core in minutes. Rapid5GS turns a stock Ubuntu 24.04 LTS or Debian 12 server into a production-ready [Open5GS](https://open5gs.org/) LTE/5G packet core (EPC/5GC). One command. Free and open source under GPL v3. Written by WISP operators who got tired of six-figure core quotes.
+Deploy your mobile network core in minutes. Rapid5GS turns a stock Ubuntu 24.04 LTS server into a production-ready [Open5GS](https://open5gs.org/) LTE/5G packet core (EPC/5GC). One command. Free and open source under GPL v3. Written by WISP operators who got tired of six-figure core quotes.
 
 Website: [rapid5gs.com](https://rapid5gs.com/)
 
 ## Quick Start
 
-Run this on a fresh Ubuntu 24.04 LTS or Debian 12 box:
+Run this on a fresh Ubuntu 24.04 LTS box:
 
 ```bash
 git clone https://github.com/joshualambert/rapid5gs.git && cd rapid5gs && chmod +x install.sh && sudo ./install.sh
@@ -27,7 +27,7 @@ About twenty minutes later you have a running core and a web UI for subscriber m
 
 ## System Requirements
 
-- Ubuntu Server 24.04 LTS or Debian 12, freshly installed
+- Ubuntu Server 24.04 LTS, freshly installed
 - Root privileges (sudo)
 - 4GB+ RAM
 - 20GB+ free disk space
@@ -36,7 +36,7 @@ About twenty minutes later you have a running core and a web UI for subscriber m
 
 The installer's requirements check (option 1) verifies all of this for you.
 
-> **IMPORTANT**: Rapid5GS is only tested against fresh installations of Ubuntu 24.04 LTS or Debian 12. Install it before any other packages or system modifications.
+> **IMPORTANT**: Rapid5GS is only tested against fresh installations of Ubuntu 24.04 LTS. Install it before any other packages or system modifications.
 
 ## What the Installer Does
 
