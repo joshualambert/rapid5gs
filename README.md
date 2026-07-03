@@ -11,145 +11,121 @@
 
 # Rapid5GS
 
-> PRO VERSION IN DEVELOPMENT — 50% OFF PRE‑SALE
->
-> Rapid5GS Pro adds a beautiful web UI, routed IP pools, a real‑time view of which subscribers are attached to which eNodeBs, easier network‑wide APN management, bulk subscriber tools, session control, and more. Purchasing now helps fund development of both Rapid5GS Pro and this open‑source version.
->
-> Get it here: [Rapid5GS Pro at TheEdgeMile.com](https://theedgemile.com/product/rapid5gs-pro/)
+Deploy your mobile network core in minutes. Rapid5GS turns a stock Ubuntu 24.04 LTS or Debian 12 server into a production-ready [Open5GS](https://open5gs.org/) LTE/5G packet core (EPC/5GC). One command. Free and open source under GPL v3. Written by WISP operators who got tired of six-figure core quotes.
 
-## What is a Mobility Core?
+Website: [rapid5gs.com](https://rapid5gs.com/)
 
-In mobile telecommunications, the Mobility Core (known as EPC in 4G or 5GC in 5G) is the central nervous system of your mobile network. It's responsible for:
+## Quick Start
 
-- Managing user authentication and security
-- Handling voice and data connections
-- Routing traffic between users and the internet
-- Managing network resources and quality of service
-- Supporting mobility as users move between cells
-
-Think of it as the "brain" of your mobile network - without it, your base stations (eNodeBs/gNodeBs) would be like disconnected islands with no way to communicate with each other or the outside world.
-
-## The Problem
-
-Setting up a mobile core network has traditionally been a nightmare:
-
-1. **Commercial Solutions**: Enterprise-grade solutions from companies like Nokia, Ericsson, or Huawei, while powerful, require significant monetary investment and specialized expertise to deploy.
-
-2. **Open Source Options**: While open-source solutions like Open5GS and Magma exist, they're notoriously difficult to configure. You need to:
-   - Manually install dozens of dependencies
-   - Configure complex networking rules
-   - Set up databases and web interfaces
-   - Deal with cryptic error messages
-   - Spend days or weeks getting everything working
-
-3. **Documentation**: Most documentation assumes you're already a mobility 4G/5G expert, making it nearly impossible for newcomers to get started.
-
-## The Solution: Rapid5GS
-
-Rapid5GS is a one-command solution that automates the entire process of setting up a production-ready Open5GS core network for fixed wireless operators. It:
-
-- Works with both 4G (EPC) and 5G (5GC) networks
-- Handles all dependencies automatically
-- Configures networking and security
-- Sets up monitoring and management tools
-- Provides a user-friendly web interface
-- Includes health checks and troubleshooting tools
-
-### Quick Start
-
-Just run this one command on Ubuntu 24.04 LTS or Debian 12:
+Run this on a fresh Ubuntu 24.04 LTS or Debian 12 box:
 
 ```bash
 git clone https://github.com/joshualambert/rapid5gs.git && cd rapid5gs && chmod +x install.sh && sudo ./install.sh
 ```
 
-### System Requirements
+About twenty minutes later you have a running core and a web UI for subscriber management.
 
-- Ubuntu Server 24.04 LTS or Debian 12
-- Root privileges (sudo access)
-- At least 4GB RAM
-- At least 20GB free disk space
-- 2 physical network interfaces
+## System Requirements
 
-> **IMPORTANT**: Rapid5GS is only tested and developed against fresh installations of Ubuntu 24.04 LTS or Debian 12. It is HIGHLY ADVISED to install this on a fresh copy of these operating systems before installing any other packages or making system modifications.
+- Ubuntu Server 24.04 LTS or Debian 12, freshly installed
+- Root privileges (sudo)
+- 4GB+ RAM
+- 20GB+ free disk space
+- Two distinct IPv4 addresses (two NICs, or a virtual interface)
+- A CPU with AVX support (required by MongoDB 5.0+; most hardware from the last decade qualifies)
 
-### Features
+The installer's requirements check (option 1) verifies all of this for you.
 
-- **Automated Installation**: Step-by-step menu guides you through the entire process
-- **Network Configuration**: Automatically sets up all required networking rules
-- **Health Monitoring**: Built-in tools to monitor network performance and troubleshoot issues
-- **Web Interface**: Easy-to-use dashboard for managing your network
-- **Hybrid Support**: Works with both 4G and 5G networks simultaneously
+> **IMPORTANT**: Rapid5GS is only tested against fresh installations of Ubuntu 24.04 LTS or Debian 12. Install it before any other packages or system modifications.
 
-### Network Control Interface
+## What the Installer Does
 
-After installation, you can monitor and control your network using the built-in control interface:
+`install.sh` walks you through a numbered menu:
+
+1. **Check System Requirements**: OS version, RAM, disk, IPv4 addresses, CPU AVX support
+2. **Configure Installation**: interfaces, PLMN (MCC/MNC/TAC), APN, DNS, WebUI credentials
+3. **Install MongoDB**
+4. **Install NodeJS**
+5. **Install Open5GS**: packages, YAML configuration, networking and NAT rules, systemd services
+6. **Install Open5GS Web UI**: subscriber management behind NGINX
+7. **Health Check**: verify every service is up and configured correctly
+8. **Reboot Services**
+
+It deploys both the 4G EPC (MME, HSS, SGW-C/U, PCRF) and the 5G core functions (AMF, UPF, NRF, AUSF, UDM, UDR, NSSF, PCF, BSF), so the same box serves LTE today and 5G when you're ready. An uninstall script (`scripts/uninstall.sh`) and an SSL configuration script for the WebUI are included.
+
+## Network Control Interface
+
+After installation, monitor and control your network with:
 
 ```bash
 chmod +x control.sh && sudo ./control.sh
 ```
 
-The control interface provides several powerful tools:
+The control panel gives you:
 
-1. **EPC Throughput Monitor**: Real-time view of network traffic and performance
-2. **eNB Status**: Monitor connected base stations and their status
-3. **UE Status**: Track connected user devices and their activities
-4. **Live MME Logs**: Real-time monitoring of the Mobility Management Entity
-5. **Live SMF Logs**: Real-time monitoring of the Session Management Function
+1. **EPC Throughput Monitor**: real-time traffic and performance
+2. **eNB Status**: connected base stations at a glance
+3. **UE Status**: connected user devices and their activity
+4. **Live MME Logs**: real-time Mobility Management Entity tail
+5. **Live SMF Logs**: real-time Session Management Function tail
 
-This interface makes it easy to monitor your network's health and troubleshoot issues without diving into complex configuration files or logs.
+No digging through config files or journalctl syntax to see what your network is doing.
 
-### Current Limitations
+## Current Limitations
 
-- **NAT Mode Only**: Currently, the system only supports NAT mode for user traffic. All NAT operations are performed on the local machine.
-- **Future Enhancements**: Support for routed IP pools and upstream NAT is planned for future releases.
-- **Single Instance**: The current version is designed for single-instance deployment. Clustering support will be added in future releases.
+- **NAT mode only**: subscriber traffic is NATed on the core itself. Routed IP pools and public customer IPs are a [Rapid5GS Pro](https://theedgemile.com/product/rapid5gs-pro/) feature.
+- **Single instance**: designed for single-box deployment.
 
-### Supported Hardware
+## Rapid5GS Pro
 
-#### Base Stations (eNodeBs)
-The following 4G base stations have been tested and verified to work with Rapid5GS:
-- Airspan AirHarmony and AirSpeed units
-- Nokia AZQC CBRS
-- Baicells 436q and Nova 233
+Running a real network? [Rapid5GS Pro](https://theedgemile.com/product/rapid5gs-pro/) is the commercial version, with development led by Michael Halls at [Nimbus Solutions](https://nimbussolutions.org). It adds:
 
-While theoretically any standards-compliant 4G eNodeB should work, only the above units have been thoroughly tested. 5G hardware support is planned but not yet tested.
+- A full web GUI for core management
+- A multi-UPF/SMF network optimization stack with Linux tuning
+- Direct routing across multiple APNs, including public IPs to customer devices
+- 8 hours of expert deployment support
 
-#### User Equipment (UEs)
-The following user devices have been tested and verified:
-- Global Telecom Titan 4000 (our recommended choice for best performance)
-- BEC RidgeWave
-- Airspan AirSpot UEs
+$9,950 one-time, per core. No recurring license or per-subscriber fees. Purchasing Pro funds continued development of this open source version.
+
+## Tested Hardware
+
+Any standards-compliant eNodeB should work, but these units are tested on production Rapid5GS networks:
+
+**Base stations (eNBs/gNBs)**
+
+- Nokia AZQC CBRS (recommended)
+- Baicells 436Q (recommended)
+- Baicells 430i and Nova 233
+- Airspan AirHarmony and AirSpeed
+
+**User equipment (UEs/CPE)**
+
+- Nokia FastMile 5G16-A and 5G16-B (recommended)
+- Global Telecom Titan 4000
+- BEC RidgeWave 6900
+- Airspan AirSpot
+
+Refurbished, tested CBRS hardware (Baicells 436Q units, Nokia AZQC RRHs, and complete 3-sector Nokia site kits with PCI planning, SAS setup, and core configuration) is sold at [The Edge Mile](https://theedgemile.com/). Hardware purchases fund Rapid5GS development.
+
+## Deployment Help
+
+- **Tower and sector installation**: CBRS gear must be installed and registered by a Certified Professional Installer (CPI) under FCC Part 96. [Vertical Axis](https://vertical-axis.com/services/sector-and-backhaul/) handles CBRS sector builds, SAS registration, antennas, and backhaul, and they know this stack.
+- **Consulting**: I'm available for hire for network planning, construction, licensing, and deployment of Rapid5GS in your network. Contact me at [joshlambert.xyz/contact](https://joshlambert.xyz/contact/).
+- **Marketing**: [ISP Hyperdrive](https://isphyperdrive.com/) builds subscriber-acquisition websites and runs marketing for WISPs and broadband operators.
 
 ## Acknowledgments
 
-- Open5GS team for their work on building an open-source mobility code.
-- David Peterson ([4GEngineer.com](https://4gengineer.com)) and Michael Halls ([nimbussolutions.org](https://nimbussolutions.org)) for teaching me the basics of LTE.
-- Nick Jones ([omnitouch.co.au](https://omnitouch.co.au)) for helping me setup my first Open5GS core installation.
-- Sarah Kerr ([isptechnology.ca](https://isptechnology.ca)) and Anthony Polsinelli ([cydrion.com](https://cydrion.com)) for lots of patience and help with networking the Mikrotik layer.
+- The [Open5GS team](https://open5gs.org/), for building an excellent open source mobility core.
+- David Peterson ([4GEngineer.com](https://4gengineer.com)) and Michael Halls ([nimbussolutions.org](https://nimbussolutions.org)), for teaching me the basics of LTE.
+- Nick Jones ([omnitouch.co.au](https://omnitouch.co.au)), for helping me set up my first Open5GS core.
+- Sarah Kerr ([isptechnology.ca](https://isptechnology.ca)) and Anthony Polsinelli ([carbonnetworksolutions.com](https://carbonnetworksolutions.com/)), for lots of patience with the MikroTik layer.
+- John Nettles and [Pine Belt Communications](https://www.pinebelt.net/), for mobility expertise and Band 71 spectrum during development.
 
 ## Sponsored By
 
 - [Centreville Tech, LLC](https://centrevilletech.com)
 - [Alabama Lightwave, Inc.](https://alabamalightwave.com)
 
-## Available For Hire
+## License
 
-I'm available for hire to help deploy this EPC in your network. I also provide other network deployment services including:
-
-- RF planning
-- Tower construction
-- Network design
-- Marketing/sales support
-- Software automation
-- And more
-
-Contact me for more information on my personal website here: [https://joshlambert.xyz/contact/](https://joshlambert.xyz/contact/).
-
-## Hardware: Refurbished Nokia LTE AirScale Site Kits
-
-Looking to deploy quickly? We offer fully tested and refurbished Nokia AZQC CBRS LTE site kits with sectors, low‑PIM jumpers, SFP/SFP+ modules, RRHs, BBU components, and more — everything you need except DC power and fiber plant. Purchasing these kits helps fund the continued development of Rapid5GS.
-
-Learn more or purchase here:
-
-- [Nokia AZQC 3‑Sector CBRS Site Kit (Tested, 4T4R RRHs + Antennas + Rapid5GS Consulting)](https://theedgemile.com/product/nokia-azqc-3-sector-cbrs-site-kit-tested-4t4r-rrhs-antennas-rapid5gs-consulting/)
+GPL v3. See [LICENSE](LICENSE). Provided as-is, without warranty of any kind; see the [website terms](https://rapid5gs.com/terms/) for details.
